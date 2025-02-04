@@ -1,0 +1,349 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <!-- Meta viewport para dispositivos mobile -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokémon Challenge Mobile</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 10px;
+            padding: 0;
+            background-color: #f7f7f7;
+            color: #333;
+        }
+
+        h1, h2 {
+            text-align: center;
+            color: #444;
+        }
+
+        .section {
+            background: #fff;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            margin: 10px 0 5px;
+            font-weight: bold;
+        }
+
+        input, select {
+            padding: 10px;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        button {
+            margin-top: 15px;
+            padding: 12px;
+            font-size: 1rem;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+            button:hover {
+                background-color: #0056b3;
+            }
+
+        .item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+            .item:last-child {
+                border-bottom: none;
+            }
+
+            .item img {
+                width: 50px;
+                margin-right: 10px;
+            }
+
+        .message {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: green;
+            text-align: center;
+        }
+
+        .error {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: red;
+            text-align: center;
+        }
+
+        .conteiner {
+            width: 380px;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="conteiner">
+        <h1>Pokémon Challenge Mobile</h1>
+        <a href="../swagger" target="_blank"><h2>Swagger</h2></a>
+
+        <!-- Seção de Cadastro de Treinador -->
+        <section class="section" id="trainer-registration">
+            <h2>Cadastro do Treinador</h2>
+            <form id="trainerForm">
+                <label for="trainerName">Nome:</label>
+                <input type="text" id="trainerName" placeholder="Digite seu nome" required>
+
+                <label for="trainerAge">Idade:</label>
+                <input type="text" id="trainerAge" placeholder="Digite sua idade" required>
+
+                <label for="trainerCpf">CPF:</label>
+                <input type="text" id="trainerCpf" placeholder="Digite seu CPF" required>
+
+                <button type="submit">Cadastrar Treinador</button>
+            </form>
+            <div id="trainerMessage"></div>
+        </section>
+
+        <!-- Seção de Listagem de Treinadores -->
+        <section class="section" id="trainer-list-section">
+            <h2>Treinadores Cadastrados</h2>
+            <select id="trainerSelect">
+                <option value="">Selecione um treinador</option>
+            </select>
+            <button id="refreshTrainersBtn">Atualizar Lista</button>
+        </section>
+
+        <!-- Seção de Pokémons Aleatórios -->
+        <section class="section" id="random-pokemons">
+            <h2>Pokémons Aleatórios</h2>
+            <button id="loadRandomBtn">Carregar Pokémons Aleatórios</button>
+            <div id="pokemonList"></div>
+        </section>
+
+        <!-- Seção para Capturar Pokémon -->
+        <section class="section" id="capture-pokemon">
+            <h2>Capturar Pokémon</h2>
+            <form id="captureForm">
+                <!-- O treinador agora é selecionado a partir do select -->
+                <label for="capturePokemonId">ID do Pokémon:</label>
+                <input type="text" id="capturePokemonId" placeholder="Digite o ID do Pokémon" required>
+
+                <button type="submit">Capturar Pokémon</button>
+            </form>
+            <div id="captureMessage"></div>
+        </section>
+
+        <!-- Seção para Listar Pokémons Capturados -->
+        <section class="section" id="captured-pokemons">
+            <h2>Pokémons Capturados</h2>
+            <button id="listCapturedBtn">Listar Capturados do Treinador Selecionado</button>
+            <div id="capturedList"></div>
+        </section>
+    </div>
+    <script>
+        const apiUrl = "https://localhost:7048";
+
+        window.onload = function () {
+            window.open(apiUrl + "/swagger/index.html", "_blank");
+        };
+
+        // Exibir mensagens
+        function showMessage(elementId, message, isError = false) {
+            const el = document.getElementById(elementId);
+            el.textContent = message;
+            el.className = isError ? "error" : "message";
+        }
+
+        // Carregar a lista de treinadores
+        async function loadTrainers() {
+            try {
+                const response = await fetch(`${apiUrl}/api/Trainer/list`);
+                if (!response.ok) {
+                    throw new Error("Erro ao carregar treinadores.");
+                }
+                const trainers = await response.json();
+                const trainerSelect = document.getElementById("trainerSelect");
+                // Limpar opções anteriores (exceto a primeira)
+                trainerSelect.innerHTML = '<option value="">Selecione um treinador</option>';
+                trainers.forEach(trainer => {
+                    const option = document.createElement("option");
+                    option.value = trainer.id;
+                    option.textContent = `${trainer.name} (ID: ${trainer.id})`;
+                    trainerSelect.appendChild(option);
+                });
+            } catch (err) {
+                showMessage("trainerMessage", err.message, true);
+            }
+        }
+
+        // Cadastro de treinador
+        document.getElementById("trainerForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const name = document.getElementById("trainerName").value;
+            const age = document.getElementById("trainerAge").value;
+            const cpf = document.getElementById("trainerCpf").value;
+            const trainerData = { name, age, cpf };
+
+            try {
+                const response = await fetch(`${apiUrl}/api/Trainer`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(trainerData)
+                });
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(errorText);
+                }
+                const result = await response.json();
+                showMessage("trainerMessage", `Treinador cadastrado com sucesso! ID: ${result.id}`);
+                // Atualiza a lista de treinadores após cadastro
+                await loadTrainers();
+            } catch (err) {
+                showMessage("trainerMessage", err.message, true);
+            }
+        });
+
+        // Atualizar lista de treinadores ao clicar no botão
+        document.getElementById("refreshTrainersBtn").addEventListener("click", loadTrainers);
+
+        // Carregar pokémons aleatórios
+        document.getElementById("loadRandomBtn").addEventListener("click", async () => {
+            try {
+                const response = await fetch(`${apiUrl}/api/pokemon/random`);
+                if (!response.ok) {
+                    throw new Error("Erro ao carregar pokémons.");
+                }
+                const pokemons = await response.json();
+                const listEl = document.getElementById("pokemonList");
+                listEl.innerHTML = "";
+                pokemons.forEach(pokemon => {
+                    const item = document.createElement("div");
+                    item.className = "item";
+                    item.innerHTML = `
+                        <div style="display:flex; align-items: center;">
+                          <img src="${pokemon.sprites.front_default}" alt="${pokemon.name}">
+                          <span><strong>${pokemon.name}</strong> (ID: ${pokemon.id})</span>
+                        </div>
+                        <button onclick="captureFromList(${pokemon.id})">Capturar</button>
+                      `;
+                    listEl.appendChild(item);
+                });
+            } catch (err) {
+                showMessage("pokemonList", err.message, true);
+            }
+        });
+
+        // Capturar Pokémon a partir da lista
+        async function captureFromList(pokemonId) {
+            // Obtém o treinador selecionado
+            const trainerSelect = document.getElementById("trainerSelect");
+            const trainerId = parseInt(trainerSelect.value);
+            if (!trainerId) {
+                showMessage("captureMessage", "Selecione um treinador.", true);
+                return;
+            }
+            try {
+                const response = await fetch(`${apiUrl}/api/pokemon/capture`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ trainerId, pokemonId })
+                });
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || "Erro ao capturar o Pokémon.");
+                }
+                const result = await response.json();
+                showMessage("captureMessage", result.message);
+            } catch (err) {
+                showMessage("captureMessage", err.message, true);
+            }
+        }
+
+        // Capturar Pokémon via formulário
+        document.getElementById("captureForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const trainerSelect = document.getElementById("trainerSelect");
+            const trainerId = parseInt(trainerSelect.value);
+            const pokemonId = parseInt(document.getElementById("capturePokemonId").value);
+            if (!trainerId) {
+                showMessage("captureMessage", "Selecione um treinador válido.", true);
+                return;
+            }
+            try {
+                const response = await fetch(`${apiUrl}/api/pokemon/capture`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ trainerId, pokemonId })
+                });
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || "Erro ao capturar o Pokémon.");
+                }
+                const result = await response.json();
+                showMessage("captureMessage", result.message);
+            } catch (err) {
+                showMessage("captureMessage", err.message, true);
+            }
+        });
+
+        // Listar Pokémons capturados para o treinador selecionado
+        document.getElementById("listCapturedBtn").addEventListener("click", async () => {
+            const trainerSelect = document.getElementById("trainerSelect");
+            const trainerId = parseInt(trainerSelect.value);
+            if (!trainerId) {
+                showMessage("capturedList", "Selecione um treinador válido.", true);
+                return;
+            }
+            try {
+                const response = await fetch(`${apiUrl}/api/pokemon/${trainerId}/captured`);
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || "Erro ao buscar os pokémons capturados.");
+                }
+                const capturedList = await response.json();
+                const listEl = document.getElementById("capturedList");
+                listEl.innerHTML = "";
+                if (capturedList.length === 0) {
+                    listEl.innerHTML = "<p>Nenhum Pokémon capturado.</p>";
+                } else {
+                    capturedList.forEach(item => {
+                        const div = document.createElement("div");
+                        div.className = "item";
+                        div.innerHTML = `
+                          <div>
+                            <img src="${item.pokemon.imageUrl}" alt="${item.pokemon.name}">
+                            <strong>Pokémon:</strong> ${item.pokemon.name} (ID: ${item.pokemon.id})
+                            <br>
+                            <strong>Capturado em:</strong> ${new Date(item.capturedAt).toLocaleString()}
+                          </div>
+                        `;
+                        listEl.appendChild(div);
+                    });
+                }
+            } catch (err) {
+                showMessage("capturedList", err.message, true);
+            }
+        });
+
+        // Carrega os treinadores na inicialização da página
+        window.onload = loadTrainers;
+    </script>
+</body>
+</html>
