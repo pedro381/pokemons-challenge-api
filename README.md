@@ -1,51 +1,130 @@
-# Backend Challenge - Pokémons
+```markdown
+# Pokémons Challenge API
 
-## Introdução
+Uma API robusta para listar, buscar e capturar Pokémons, além de gerenciar treinadores e suas capturas, utilizando dados da PokéAPI.
 
-Este é um teste para que possamos ver as suas habilidades como Backend Developer.
+---
 
-Nesse teste você deverá desenvolver um projeto para listar pokémons, utilizando como base a API [https://pokeapi.co/](https://pokeapi.co/ "https://pokeapi.co/").
+## Descrição
 
-[SPOILER] As instruções de entrega e apresentação do teste estão no final deste Readme (=
+O **Pokémons Challenge API** é uma aplicação backend desenvolvida para demonstrar habilidades em desenvolvimento de APIs, consumindo a PokéAPI para listagem e consulta de Pokémons. Além disso, a aplicação possibilita o cadastro de treinadores, o registro de capturas de Pokémons e a listagem dos Pokémons capturados por cada treinador.
 
-### Antes de começar
- 
-- O projeto deve utilizar a Linguagem específica na avaliação. Por exempo: C#
-- Considere como deadline da avaliação a partir do início do teste. Caso tenha sido convidado a realizar o teste e não seja possível concluir dentro deste período, avise a pessoa que o convidou para receber instruções sobre o que fazer.
-- Documentar todo o processo de investigação para o desenvolvimento da atividade (README.md no seu repositório); os resultados destas tarefas são tão importantes do que o seu processo de pensamento e decisões à medida que as completa, por isso tente documentar e apresentar os seus hipóteses e decisões na medida do possível.
+---
 
-## Backend-end
+## Tecnologias e Bibliotecas Utilizadas
 
-- Get para 10 Pokémon aleatórios
-- GetByID para 1 Pokémon específico
-- Cadastro do mestre pokemon (dados básicos como nome, idade e cpf) em SQLite
-- Post para informar que um Pokémon foi capturado.
-- Listagem dos Pokémon já capturados.
+- **Linguagem:** C#
+- **Framework:** ASP.NET Core Web API
+- **ORM:** Entity Framework Core
+- **Banco de Dados:** SQLite
+- **Cliente HTTP:** Refit (para consumo da PokéAPI)
+- **Documentação:** Swagger (Swashbuckle)
+- **Testes:** xUnit, Moq, InMemoryDatabase (para testes unitários)
+- **Outras Bibliotecas:** 
+  - Microsoft.EntityFrameworkCore.Design (para migrações)
+  - Microsoft.AspNetCore.Mvc
+
+---
+
+## Como Instalar e Usar o Projeto
+
+### Pré-requisitos
+
+- [.NET 6 ou superior](https://dotnet.microsoft.com/download)
+- [SQLite](https://www.sqlite.org/index.html) (opcional, já que a aplicação usa um arquivo local)
+- Git
+
+### Passo a Passo
+
+1. **Clone o Repositório**
+
+   ```bash
+   git clone https://github.com/pedro381/pokemons-challenge-api.git
+   cd pokemons-challenge-api
+   ```
+
+2. **Configuração do Banco de Dados**
+
+   - O projeto está configurado para usar SQLite. Verifique o arquivo `appsettings.json` para a connection string (por padrão: `"Data Source=pokemon.db"`).
+   - Execute as migrações para criar o banco de dados:
+     
+     ```bash
+     dotnet ef migrations add InitialCreate --project PokemonsChallenge.Repository --startup-project PokemonsChallenge.Api --output-dir Migrations
+     dotnet ef database update --project PokemonsChallenge.Repository --startup-project PokemonsChallenge.Api
+     ```
+
+3. **Executar a API**
+
+   - Navegue até o projeto da API:
+     
+     ```bash
+     cd PokemonsChallenge.Api
+     dotnet run
+     ```
+     
+   - A API ficará disponível em `https://localhost:7048` (ou outra porta configurada). A documentação interativa do Swagger pode ser acessada em `https://localhost:7048/swagger/index.html`.
+
+4. **Executar os Testes Unitários**
+
+   - Navegue até o diretório do projeto de testes e execute:
+     
+     ```bash
+     dotnet test
+     ```
+
+---
+
+## Arquitetura do Projeto
+
+O projeto está organizado em camadas para promover a separação de responsabilidades:
+
+- **API (PokemonsChallenge.Api):**
+  - Controllers e configuração do servidor (Program.cs).
+  - Documentação via Swagger.
+
+- **Aplicação / Serviço (PokemonsChallenge.Service):**
+  - Regras de negócio e serviços (ex.: PokémonService, TrainerService).
+  - Interfaces para abstrair a lógica de negócio.
+
+- **Domínio (PokemonsChallenge.Domain):**
+  - Entidades, modelos e DTOs (ex.: Trainer, Pokemon, CapturedPokemon, PokemonDto).
   
+- **Infraestrutura / Repositório (PokemonsChallenge.Repository):**
+  - Implementações de repositórios e acesso a dados via Entity Framework Core.
+  - Configuração do DbContext e migrações.
 
-### Requisitos
+- **Testes (PokemonsChallenge.Test):**
+  - Testes unitários para API, Serviços e Repositórios.
+  - Utilização do xUnit, Moq e InMemoryDatabase para simulação do banco de dados.
 
-1 - Todos os endpoints devem retornar os dados básicos do Pokémon, suas evoluções e o base64 de sprite default de cada Pokémon.
+---
 
+## Features do Projeto
 
-## Readme do Repositório
+- **Listagem de Pokémons Aleatórios:** Consome a PokéAPI para retornar 10 Pokémons aleatórios.
+- **Consulta de Pokémon por ID:** Permite buscar os detalhes de um Pokémon específico.
+- **Cadastro de Treinador:** Possibilita o registro de treinadores (nome, idade, CPF) no banco de dados SQLite.
+- **Captura de Pokémon:** Permite que um treinador capture um Pokémon, registrando a captura no banco de dados.
+- **Listagem de Pokémons Capturados:** Exibe a lista de Pokémons capturados por um treinador específico.
+- **Interface Mobile-Friendly:** Uma interface web responsiva que funciona bem em dispositivos móveis.
+- **Documentação Swagger:** Interface interativa para testar os endpoints da API.
+- **Testes Unitários:** Cobertura dos principais cenários utilizando xUnit e Moq.
+- **Integração com Refit:** Facilita o consumo da PokéAPI para obtenção dos dados dos Pokémons.
 
-- Deve conter o título do projeto
-- Uma descrição sobre o projeto em frase
-- Deve conter uma lista com linguagem, framework e/ou tecnologias usadas
-- Como instalar e usar o projeto (instruções)
-- Não esqueça o [.gitignore](https://www.toptal.com/developers/gitignore)
-- Se está usando github pessoal, referencie que é um challenge by coodesh:  
+---
 
->  This is a challenge by [Coodesh](https://coodesh.com/)
+## Contribuidores e Desenvolvedores
 
-## Finalização e Instruções para a Apresentação
+- **Pedro Souza** – [GitHub](https://github.com/pedro381)
 
-1. Adicione o link do repositório com a sua solução no teste
-2. Adicione o link da apresentação do seu projeto no README.md.
-3. Verifique se o Readme está bom e faça o commit final em seu repositório;
-4. Envie e aguarde as instruções para seguir. Sucesso e boa sorte. =)
+Sinta-se à vontade para contribuir, reportar problemas e sugerir melhorias. Todas as contribuições são bem-vindas!
 
-## Suporte
+---
 
-Use a [nossa comunidade](https://discord.gg/rdXbEvjsWu) para tirar dúvidas sobre o processo ou envie uma mensagem diretamente a um especialista no chat da plataforma. 
+## Conclusão
+
+Agradecemos por explorar o **Pokémons Challenge API**. Este projeto foi desenvolvido para demonstrar uma arquitetura limpa e escalável utilizando tecnologias modernas no ecossistema .NET. Esperamos que este projeto sirva como base para futuras inovações e contribuições.
+
+Se você deseja contribuir, por favor, faça um fork do repositório, crie sua feature branch, implemente suas mudanças e envie um pull request.  
+**Obrigado por seu interesse e boas contribuições!**
+```
