@@ -1,4 +1,3 @@
-```markdown
 # Pokémons Challenge API
 
 Uma API robusta para listar, buscar e capturar Pokémons, além de gerenciar treinadores e suas capturas, utilizando dados da PokéAPI.
