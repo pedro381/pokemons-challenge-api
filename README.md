@@ -9,7 +9,10 @@ Uma API robusta para listar, buscar e capturar Pokémons, além de gerenciar tre
 O **Pokémons Challenge API** é uma aplicação backend desenvolvida para demonstrar habilidades em desenvolvimento de APIs, consumindo a PokéAPI para listagem e consulta de Pokémons. Além disso, a aplicação possibilita o cadastro de treinadores, o registro de capturas de Pokémons e a listagem dos Pokémons capturados por cada treinador.
 
 ---
-<iframe width="560" height="315" src="https://www.youtube.com/embed/jcU1pFYKcx4?si=KEQ0O0eLGVHzQzaw" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+[Assista ao vídeo no YouTube](https://www.youtube.com/watch?v=jcU1pFYKcx4)
+
+[![Assista ao vídeo](https://img.youtube.com/vi/jcU1pFYKcx4/0.jpg)](https://www.youtube.com/watch?v=jcU1pFYKcx4)
+
 ---
 
 ## Tecnologias e Bibliotecas Utilizadas
